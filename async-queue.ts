@@ -1,46 +1,50 @@
 export class AsyncQueue<T> implements AsyncIterator<T>
 {
-    private _data:     T[] = [];
-    private _promises: (({}: IteratorResult<T>) => void)[] = [];
+    private _reads:  (({}: IteratorResult<T>) => void)[] = [];
+    private _writes: [() => void, T][]                   = [];
 
-
-    get size(): number { return this._data.length; }
 
     next(): Promise<IteratorResult<T>>
     {
         return new Promise(resolve => {
-            this._promises.push(resolve);
+            this._reads.push(resolve);
             this._flush();
         });
     }
 
-    push(...values: T[]) {
-        this._data.push(...values);
-        this._flush();
+    push(value: T): Promise<void>
+    {
+        return new Promise(resolve => {
+            this._writes.push([resolve, value]);
+            this._flush();
+        });
     }
 
     end() {
-        for (const resolve of this._promises)
+        for (const resolve of this._reads)
             resolve({value: undefined, done: true});
 
-        this._data     = [];
-        this._promises = [];
+        this._reads = [];
+
+
+        for (const [resolve] of this._writes)
+            resolve();
+
+        this._writes = [];
     }
 
     [Symbol.asyncIterator](): AsyncIterator<T> { return this; }
 
 
     private _flush() {
-        let count = Math.min(
-            this._data.length,
-            this._promises.length
-        );
+        let count = Math.min(this._reads.length, this._writes.length);
 
         while (count--) {
-            const resolve = this._promises.shift()!;
-            const value   = this._data.shift()!;
+            const resolveRead           = this._reads.shift()!;
+            const [resolveWrite, value] = this._writes.shift()!;
 
-            resolve({value, done: false});
+            resolveRead({value, done: false});
+            resolveWrite();
         }
     }
 }
