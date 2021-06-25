@@ -19,5 +19,4 @@ emustorage.user.js - Web Storage shim, used mostly as a workaround for sites
 iterutils.js       - a random selection of common list operations, designed
                      around iterators and generators instead of arrays.
 geany/             - plugins for Geany, most of them workarounds for random annoyances.
-
 ```
