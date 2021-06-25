@@ -8,6 +8,7 @@ More will be added as I see fit.
 
 
 ### Index ###
+
 ```
 defer.hpp          - scope guards implemented with lambdas in C++, behaves identically
                      to scope(exit/success/failure) in D. C++17 and later only.
@@ -17,4 +18,6 @@ emustorage.user.js - Web Storage shim, used mostly as a workaround for sites
                      that break themselves in the absence of the real APIs.
 iterutils.js       - a random selection of common list operations, designed
                      around iterators and generators instead of arrays.
+geany/             - plugins for Geany, most of them workarounds for random annoyances.
+
 ```
