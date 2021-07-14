@@ -8,32 +8,32 @@
 #endif
 
 
-#define DEFER_DEFCLASS(name, ...)                                        \
-    template <typename F>                                                \
-    class name {                                                         \
-        const F func;                                                    \
-                                                                         \
-        public:                                                          \
-            constexpr name(F &&f) noexcept : func(std::forward<F>(f)) {} \
-            __VA_ARGS__                                                  \
-            name(name &&) = delete;                                      \
-            name &operator=(name &&) = delete;                           \
+#define DEFER_DEFCLASS(name, ...)                                         \
+    template <class F>                                                    \
+    class name {                                                          \
+        const F _func;                                                    \
+                                                                          \
+        public:                                                           \
+            constexpr name(F &&f) noexcept : _func(std::forward<F>(f)) {} \
+            __VA_ARGS__                                                   \
+            name(name &&)            = delete;                            \
+            name &operator=(name &&) = delete;                            \
     }
 
 namespace Defer {
     #if __cplusplus >= 202002L
-        DEFER_DEFCLASS(Exit, constexpr ~Exit() { this->func(); });
+        DEFER_DEFCLASS(Exit, constexpr ~Exit() { _func(); });
     #else
-        DEFER_DEFCLASS(Exit, ~Exit() { this->func(); });
+        DEFER_DEFCLASS(Exit, ~Exit() { _func(); });
     #endif
 
     #ifdef __cpp_exceptions
         DEFER_DEFCLASS(Success, ~Success() {
-            if (std::uncaught_exceptions() == 0) this->func();
+            if (std::uncaught_exceptions() == 0) _func();
         });
 
         DEFER_DEFCLASS(Failure, ~Failure() {
-            if (std::uncaught_exceptions() > 0) this->func();
+            if (std::uncaught_exceptions() > 0) _func();
         });
     #endif
 }
