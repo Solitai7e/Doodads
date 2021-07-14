@@ -10,39 +10,23 @@
 class Storage {
     #data;
 
+
     constructor(data = []) {
         this.#data = new Map(data);
         return new Proxy(this, Storage.#metaInterface);
     }
 
 
-    get length() {
-        return this.#data.size;
-    }
-
+    get length()   { return this.#data.size; }
     set length({}) {}
 
+    key(index) { return [...this.#data.keys()][index] ?? null; }
 
-    key(index) {
-        return [...this.#data.keys()][index] ?? null;
-    }
+    getItem(key)        { return this.#data.get(String(key)) ?? null; }
+    setItem(key, value) { this.#data.set(String(key), String(value)); }
+    removeItem(key)     { this.#data.delete(String(key)); }
 
-    getItem(key) {
-        return this.#data.get(String(key)) ?? null;
-    }
-
-    setItem(key, value) {
-        this.#data.set(String(key), String(value));
-    }
-
-    removeItem(key) {
-        this.#data.delete(String(key));
-    }
-
-    clear() {
-        this.#data.clear();
-    }
-
+    clear() { this.#data.clear(); }
 
     toString() {
         return JSON.stringify(
@@ -52,31 +36,27 @@ class Storage {
     }
 
 
+    #isProperty(property) {
+        return property in this || typeof property !== "string";
+    }
+
     static #metaInterface = {
-        preventExtensions(target) {
-            throw new TypeError("Cannot prevent extensions");
-        },
+        preventExtensions(target) { return false; },
 
         getOwnPropertyDescriptor(target, property) {
-            if (property in target || typeof property !== "string") {
+            if (target.#isProperty(property))
                 return Reflect.getOwnPropertyDescriptor(...arguments);
-            }
-            else if (target.#data.has(property)) {
+            else if (target.#data.has(property))
                 return {
                     value:        target.#data.get(property),
                     writable:     true,
                     enumerable:   true,
                     configurable: true
                 };
-            }
         },
 
         defineProperty(target, property, descriptor) {
-            if (
-                "get" in descriptor ||
-                "set" in descriptor ||
-                typeof property !== "string"
-            ) {
+            if (!("value" in descriptor) || typeof property !== "string") {
                 return Reflect.defineProperty(...arguments);
             }
             else {
@@ -92,8 +72,8 @@ class Storage {
         },
 
         get(target, property, receiver) {
-            if (property in target || typeof property !== "string") {
-                const value = Reflect.get(target, property);
+            if (target.#isProperty(property)) {
+                const value = Reflect.get(...arguments);
 
                 return typeof value === "function" ?
                     value.bind(target) :
@@ -105,8 +85,8 @@ class Storage {
         },
 
         set(target, property, value, receiver) {
-            if (property in target || typeof property !== "string") {
-                return Reflect.set(target, property, value);
+            if (target.#isProperty(property)) {
+                return Reflect.set(...arguments);
             }
             else {
                 target.#data.set(property, String(value));
@@ -115,7 +95,7 @@ class Storage {
         },
 
         deleteProperty(target, property) {
-            if (property in target || typeof property !== "string") {
+            if (target.#isProperty(property)) {
                 return Reflect.deleteProperty(...arguments);
             }
             else {
