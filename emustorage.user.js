@@ -11,8 +11,8 @@ class Storage {
     #data;
 
 
-    constructor(data = []) {
-        this.#data = new Map(data);
+    constructor(data = {}) {
+        this.#data = new Map(Object.entries(data));
         return new Proxy(this, Storage.#metaInterface);
     }
 
@@ -29,10 +29,8 @@ class Storage {
     clear() { this.#data.clear(); }
 
     toString() {
-        return JSON.stringify(
-            Object.fromEntries(this.#data.entries()),
-            null, "\t"
-        );
+        const data = Object.fromEntries(this.#data.entries());
+        return JSON.stringify(data, null, "\t");
     }
 
 
@@ -73,7 +71,7 @@ class Storage {
 
         get(target, property, receiver) {
             if (target.#isProperty(property)) {
-                const value = Reflect.get(...arguments);
+                const value = Reflect.get(target, property);
 
                 return typeof value === "function" ?
                     value.bind(target) :
@@ -86,7 +84,7 @@ class Storage {
 
         set(target, property, value, receiver) {
             if (target.#isProperty(property)) {
-                return Reflect.set(...arguments);
+                return Reflect.set(target, property, value);
             }
             else {
                 target.#data.set(property, String(value));
@@ -119,7 +117,7 @@ try {
     unsafeWindow.sessionStorage;
 }
 catch {
-    const initialValues = Object.entries(GM_getValue(location.origin, {}));
+    const initialValues = GM_getValue(location.origin, {});
 
     Object.defineProperties(unsafeWindow, {
         localStorage:   {value: new Storage(initialValues)},
