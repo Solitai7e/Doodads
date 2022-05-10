@@ -6,6 +6,31 @@
 // @grant       GM_getValue
 // ==/UserScript==
 
+// Drop-in replacement for localStorage and sessionStorage
+// backed by a map, created as a workaround for sites that
+// refuse to function without localStorage or sessionStorage.
+//
+// This class is mostly just a reimplementation of the Storage
+// interface described by MDN. Any behavior not mentioned there
+// was taken from Chromium. The "legacy" interface, in which
+// storage items are accessible as object properties, is also
+// supported with the use of a proxy.
+//
+// Data written to this object does not persist between
+// page reloads or propagate to another tab with the same
+// origin. (i.e. it will never trigger the storage event)
+//
+// On page load, this script attempts to access the real
+// localStorage and sessionStorage. If either operation
+// throws an exception, both properties will be re-assigned
+// with an instance of this class. The instance created for
+// localStorage will also be populated with user-specified
+// data retrieved from the userscript's own storage, should
+// there be any.
+//
+// The toString method has been repurposed to return a string
+// containing every storage item in the form of a JSON object.
+
 
 class Storage {
     #data;
@@ -15,7 +40,6 @@ class Storage {
         this.#data = new Map(Object.entries(data));
         return new Proxy(this, Storage.#metaInterface);
     }
-
 
     get length()   { return this.#data.size; }
     set length({}) {}
@@ -73,6 +97,8 @@ class Storage {
             if (target.#isProperty(property)) {
                 const value = Reflect.get(target, property);
 
+                // Apparently if you don't do this the
+                // function gets bound to the proxy itself
                 return typeof value === "function" ?
                     value.bind(target) :
                     value;
