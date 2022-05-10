@@ -14,6 +14,7 @@ defer.hpp          - scope guards implemented with lambdas in C++, behaves ident
                      to scope(exit/success/failure) in D. C++17 and later only.
 async-queue.ts     - a FIFO queue implemented as an async iterator
 mutex.ts           - simple promise-based mutex
+semaphore.ts       - simple promise-based semaphore
 emustorage.user.js - Web Storage shim, used mostly as a workaround for sites
                      that break themselves in the absence of the real APIs.
 iterutils.js       - a random selection of common list operations, designed
