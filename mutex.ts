@@ -1,22 +1,28 @@
 export class Mutex {
-    private _queue: (({}: () => void) => void)[] = [];
+    #queue: (({}: () => void) => void)[] = [];
 
     lock(): Promise<() => void>
     {
         return new Promise(resolve => {
-            if (!this._queue[0])
-                resolve(this._grantLock());
+            if (!this.#queue[0])
+                resolve(this.#grant());
 
-            this._queue.push(resolve);
+            this.#queue.push(resolve);
         });
     }
 
-    unlock() {
-        this._queue.shift();
-        this._queue[0]?.(this._grantLock());
+    tryLock(): (() => void) | undefined
+    {
+        return !this.#queue[0] ? this.#grant()
+                               : undefined;
     }
 
-    private _grantLock(): () => void
+    unlock() {
+        this.#queue.shift();
+        this.#queue[0]?.(this.#grant());
+    }
+
+    #grant(): () => void
     {
         const {proxy, revoke} = Proxy.revocable(() => {
             revoke();
