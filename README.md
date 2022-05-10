@@ -17,7 +17,5 @@ mutex.ts           - simple promise-based mutex
 semaphore.ts       - simple promise-based semaphore
 emustorage.user.js - Web Storage shim, used mostly as a workaround for sites
                      that break themselves in the absence of the real APIs.
-iterutils.js       - a random selection of common list operations, designed
-                     around iterators and generators instead of arrays.
 geany/             - plugins for Geany, most of them workarounds for random annoyances.
 ```
