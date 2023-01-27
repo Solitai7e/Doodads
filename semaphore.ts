@@ -14,11 +14,11 @@ export class Semaphore {
 
     tryAcquire(): (() => void) | undefined
     {
-        return this.#count > 0 ? this.#grant()
-                               : undefined;
+        return this.#count > 0 ? this.#grant() : undefined;
     }
 
-    release() {
+    release()
+    {
         this.#count++;
         this.#queue.shift()?.(this.#grant());
     }

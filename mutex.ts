@@ -13,11 +13,11 @@ export class Mutex {
 
     tryLock(): (() => void) | undefined
     {
-        return !this.#queue[0] ? this.#grant()
-                               : undefined;
+        return !this.#queue[0] ? this.#grant() : undefined;
     }
 
-    unlock() {
+    unlock()
+    {
         this.#queue.shift();
         this.#queue[0]?.(this.#grant());
     }

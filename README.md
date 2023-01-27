@@ -18,5 +18,4 @@ semaphore.ts       - simple promise-based semaphore
 emustorage.user.js - Web Storage shim, used mostly as a workaround for sites
                      that break themselves in the absence of the real APIs.
 pool.h             - barebones memory/object pool idk what these are called
-geany/             - plugins for Geany, most of them workarounds for random annoyances.
 ```
